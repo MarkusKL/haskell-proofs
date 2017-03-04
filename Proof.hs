@@ -1,6 +1,9 @@
-module Proof where
+
+module Proof () where
 
 import Data.Void
+import Data.Functor.Identity (Identity, runIdentity)
+
 
 -- // Syntactic rules for the 'and' symbol \\ --
 
@@ -22,7 +25,13 @@ proof1 :: And a b -> And b a
 proof1 p1 = andI (andE2 p1) (andE1 p1)
 
 proof2 :: And (And a b) c -> And a (And b c)
-proof2 p1 = let andab = andE1 p1 in andI (andE1 andab) (andI (andE2 andab) (andE2 p1))
+proof2 p1 = runIdentity $ do
+  let ab = andE1 p1
+  let c = andE2 p1
+  let a = andE1 ab
+  let b = andE2 ab
+  return $ andI a (andI b c)
+
 
 -- // Syntactic rules for the 'or' symbol // --
 
@@ -37,6 +46,7 @@ orI2 = undefined
 orE :: Or a b -> (a -> c) -> (b -> c) -> c
 orE = undefined
 
+
 -- // Proofs using 'or' rulse \\ --
 
 proof3 :: Or a b -> Or b a
@@ -46,4 +56,7 @@ proof4 :: Or a b -> (a -> c) -> Or c b
 proof4 p1 p2 = orE p1 (orI1 . p2) (orI2)
 
 proof5 :: Or a b -> c -> Or (And a c) b
-proof5 p1 p2 = proof4 p1 (proof1 . andI p2)
+proof5 p1 p2 = runIdentity $ do
+  let l1 = (\a -> andI a p2) 
+  let l2 = proof4 p1 l1
+  return l2
