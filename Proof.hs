@@ -83,11 +83,6 @@ newtype Bot = Bot Void
 botE :: Bot -> a
 botE = undefined
 
-botI :: Or a (Neg a)
-botI = undefined
-
-lem = botI
-
 newtype Neg a = Neg Void
 
 negI :: (a -> Bot) -> Neg a
@@ -96,7 +91,17 @@ negI = undefined
 negE :: And a (Neg a) -> Bot
 negE = undefined
 
+-- // Law of the excluded middle (LEM) \\ --
+
+lem :: Or a (Neg a)
+lem = undefined
+
 -- // Proofs using bottom and negation \\ --
 
 negnegI :: a -> Neg (Neg a)
 negnegI p1 = negI (negE . andI p1)
+
+-- // Proof of modus tollens (MT) \\ --
+mt :: Imp p q -> Neg q -> Neg p
+mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
+
