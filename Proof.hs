@@ -105,3 +105,36 @@ negnegI p1 = negI (negE . andI p1)
 mt :: Imp p q -> Neg q -> Neg p
 mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
 
+
+-- // Experimental printing of expressions \\ --
+
+newtype A = A ()
+newtype B = B ()
+newtype C = C ()
+
+instance Show A where
+  show _ = "A"
+
+instance Show B where
+  show _ = "B"
+
+instance Show C where
+  show _ = "C"
+
+fst' :: f a b -> a
+fst' = undefined
+
+snd' :: f a b -> b
+snd' = undefined
+
+instance (Show a, Show b) => Show (And a b) where
+  show t = "( " ++ show (fst' t) ++ " \\/ " ++ show (snd' t) ++ " )"
+
+print1 :: And A B -> And B A
+print1 = proof1
+
+print2 :: And (And A B) C -> And A (And B C)
+print2 = proof2
+
+main :: IO ()
+main = print (print1 undefined) >> print (print2 undefined)
