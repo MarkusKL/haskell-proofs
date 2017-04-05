@@ -4,6 +4,7 @@ module Proof () where
 import Data.Void
 import Data.Functor.Identity (Identity, runIdentity)
 
+import Variables
 
 -- // Syntactic rules for the 'and' symbol \\ --
 
@@ -61,6 +62,7 @@ proof5 p1 p2 = runIdentity $ do
   let l2 = proof4 p1 l1
   return l2
 
+
 -- // Syntax rules for implication ('imp') sybmol \\ --
 
 newtype Imp a b = Imp Void
@@ -71,10 +73,12 @@ impI = undefined
 impE :: Imp a b -> a -> b
 impE = undefined
 
+
 -- // Proofs using implication ('imp') rules \\ --
 
 proof6 :: Imp a (Imp a b) -> a -> b
 proof6 p1 p2 = impE (impE p1 p2) p2
+
 
 -- // Syntax rules for bottom and negation ('bot' and 'neg') symbols \\ --
 
@@ -91,15 +95,18 @@ negI = undefined
 negE :: And a (Neg a) -> Bot
 negE = undefined
 
+
 -- // Law of the excluded middle (LEM) \\ --
 
 lem :: Or a (Neg a)
 lem = undefined
 
+
 -- // Proofs using bottom and negation \\ --
 
 negnegI :: a -> Neg (Neg a)
 negnegI p1 = negI (negE . andI p1)
+
 
 -- // Proof of modus tollens (MT) \\ --
 mt :: Imp p q -> Neg q -> Neg p
@@ -108,19 +115,6 @@ mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
 
 -- // Experimental printing of expressions \\ --
 
-newtype A = A ()
-newtype B = B ()
-newtype C = C ()
-
-instance Show A where
-  show _ = "A"
-
-instance Show B where
-  show _ = "B"
-
-instance Show C where
-  show _ = "C"
-
 fst' :: f a b -> a
 fst' = undefined
 
@@ -128,7 +122,7 @@ snd' :: f a b -> b
 snd' = undefined
 
 instance (Show a, Show b) => Show (And a b) where
-  show t = "( " ++ show (fst' t) ++ " \\/ " ++ show (snd' t) ++ " )"
+  show t = "( " ++ show (fst' t) ++ " /\\ " ++ show (snd' t) ++ " )"
 
 print1 :: And A B -> And B A
 print1 = proof1
