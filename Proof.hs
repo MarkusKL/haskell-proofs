@@ -121,8 +121,26 @@ fst' = undefined
 snd' :: f a b -> b
 snd' = undefined
 
+only :: f a -> a
+only = undefined
+
 instance (Show a, Show b) => Show (And a b) where
   show t = "( " ++ show (fst' t) ++ " /\\ " ++ show (snd' t) ++ " )"
+
+instance (Show a, Show b) => Show (Or a b) where
+  show t = "( " ++ show (fst' t) ++ " \\/ " ++ show (snd' t) ++ " )"
+
+instance (Show a) => Show (Neg a) where
+  show t = "!" ++ show (only t)
+
+instance (Show a, Show b) => Show (Imp a b) where
+  show t = "( " ++ show (fst' t) ++ " -> " ++ show (snd' t) ++ " )"
+
+instance (Show a, Show b) => Show ((->) a b) where
+  show t = "( " ++ show (fst' t) ++ " ~> " ++ show (snd' t) ++ " )"
+
+instance Show Bot where
+  show = const "_|_"
 
 print1 :: And A B -> And B A
 print1 = proof1
@@ -130,5 +148,11 @@ print1 = proof1
 print2 :: And (And A B) C -> And A (And B C)
 print2 = proof2
 
+printMT :: Imp A B -> Neg B -> Neg A
+printMT = mt
+
 main :: IO ()
-main = print (print1 undefined) >> print (print2 undefined)
+main = print (print1)
+    >> print (print2)
+    >> print (printMT)
+    >> print (botE :: (Bot -> A))
