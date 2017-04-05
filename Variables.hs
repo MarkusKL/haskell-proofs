@@ -6,15 +6,17 @@ module Variables
 
 import Data.Void (Void)
 
+import Terms
+
 newtype A = A Void
 newtype B = B Void
 newtype C = C Void
 
-instance Show A where
-    show = const "A"
+instance Term A where
+    term = const "A"
 
-instance Show B where
-    show = const "B"
+instance Term B where
+    term = const "B"
 
-instance Show C where
-    show = const "C"
+instance Term C where
+    term = const "C"

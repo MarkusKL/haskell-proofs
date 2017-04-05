@@ -5,6 +5,7 @@ import Data.Void
 import Data.Functor.Identity (Identity, runIdentity)
 
 import Variables
+import Terms
 
 -- // Syntactic rules for the 'and' symbol \\ --
 
@@ -109,38 +110,33 @@ negnegI p1 = negI (negE . andI p1)
 
 
 -- // Proof of modus tollens (MT) \\ --
+
 mt :: Imp p q -> Neg q -> Neg p
 mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
 
 
 -- // Experimental printing of expressions \\ --
 
-fst' :: f a b -> a
-fst' = undefined
+instance (Term a, Term b) => Term (And a b) where
+  term t = "( " ++ term (fst' t) ++ " /\\ " ++ term (snd' t) ++ " )"
 
-snd' :: f a b -> b
-snd' = undefined
+instance (Term a, Term b) => Term (Or a b) where
+  term t = "( " ++ term (fst' t) ++ " \\/ " ++ term (snd' t) ++ " )"
 
-only :: f a -> a
-only = undefined
+instance (Term a) => Term (Neg a) where
+  term t = "!" ++ term (only t)
 
-instance (Show a, Show b) => Show (And a b) where
-  show t = "( " ++ show (fst' t) ++ " /\\ " ++ show (snd' t) ++ " )"
+instance (Term a, Term b) => Term (Imp a b) where
+  term t = "( " ++ term (fst' t) ++ " -> " ++ term (snd' t) ++ " )"
 
-instance (Show a, Show b) => Show (Or a b) where
-  show t = "( " ++ show (fst' t) ++ " \\/ " ++ show (snd' t) ++ " )"
+instance (Term a, Term b) => Term ((->) a b) where
+  term t = "( " ++ term (fst' t) ++ " ~> " ++ term (snd' t) ++ " )"
 
-instance (Show a) => Show (Neg a) where
-  show t = "!" ++ show (only t)
+instance Term Bot where
+  term = const "_|_"
 
-instance (Show a, Show b) => Show (Imp a b) where
-  show t = "( " ++ show (fst' t) ++ " -> " ++ show (snd' t) ++ " )"
-
-instance (Show a, Show b) => Show ((->) a b) where
-  show t = "( " ++ show (fst' t) ++ " ~> " ++ show (snd' t) ++ " )"
-
-instance Show Bot where
-  show = const "_|_"
+print' :: Term t => t -> IO ()
+print' = putStrLn . term
 
 print1 :: And A B -> And B A
 print1 = proof1
@@ -152,7 +148,7 @@ printMT :: Imp A B -> Neg B -> Neg A
 printMT = mt
 
 main :: IO ()
-main = print (print1)
-    >> print (print2)
-    >> print (printMT)
-    >> print (botE :: (Bot -> A))
+main = print' (print1)
+    >> print' (print2)
+    >> print' (printMT)
+    >> print' (botE :: (Bot -> A))
