@@ -4,7 +4,13 @@ module Terms
   , fst'
   , snd'
   , only
+  , print'
   ) where
+
+
+class Term t where
+  term :: t -> String
+  -- precedence :: e -> Integer ?
 
 fst' :: Term (t a b) => t a b -> a
 fst' = undefined
@@ -15,6 +21,5 @@ snd' = undefined
 only :: f a -> a
 only = undefined
 
-class Term t where
-  term :: t -> String
-  -- precedence :: e -> Integer ?
+print' :: Term t => t -> IO ()
+print' = putStrLn . term

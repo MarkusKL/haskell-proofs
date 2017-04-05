@@ -135,20 +135,8 @@ instance (Term a, Term b) => Term ((->) a b) where
 instance Term Bot where
   term = const "_|_"
 
-print' :: Term t => t -> IO ()
-print' = putStrLn . term
-
-print1 :: And A B -> And B A
-print1 = proof1
-
-print2 :: And (And A B) C -> And A (And B C)
-print2 = proof2
-
-printMT :: Imp A B -> Neg B -> Neg A
-printMT = mt
-
 main :: IO ()
-main = print' (print1)
-    >> print' (print2)
-    >> print' (printMT)
+main = print' (proof1 :: And A B -> And B A)
+    >> print' (proof2 :: And (And A B) C -> And A (And B C))
+    >> print' (mt :: Imp A B -> Neg B -> Neg A)
     >> print' (botE :: (Bot -> A))
