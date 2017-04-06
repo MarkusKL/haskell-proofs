@@ -4,6 +4,10 @@ module Proof () where
 import Data.Void
 import Data.Functor.Identity (Identity, runIdentity)
 
+import Data.Bifunctor
+--import Data.Functor.Contravariant
+--import Data.Profunctor
+
 import Variables
 import Terms
 
@@ -35,7 +39,7 @@ proof2 p1 = runIdentity $ do
   return $ andI a (andI b c)
 
 
--- // Syntactic rules for the 'or' symbol // --
+-- // Syntactic rules for the 'or' symbol \\ --
 
 newtype Or a b = Or Void
 
@@ -114,6 +118,23 @@ negnegI p1 = negI (negE . andI p1)
 mt :: Imp p q -> Neg q -> Neg p
 mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
 
+-- // Functor instances \\ --
+
+instance Bifunctor And where
+  first f ab = andI (f . andE1 $ ab) (andE2 ab)
+  second f ab = andI (andE1 ab) (f . andE2 $ ab)
+
+instance Bifunctor Or where
+  first f ab = orE ab (orI1 . f) (orI2)
+  second f ab = orE ab (orI1) (orI2 . f)
+
+-- ### Missing dependency
+--instance Contravariant Neg where
+contramap = mt
+
+--instance Profunctor Imp where
+dimap f g ab = impI $ f . impE ab . g
+  
 
 -- // Experimental printing of expressions \\ --
 
