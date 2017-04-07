@@ -139,11 +139,11 @@ dimap f g ab = impI $ f . impE ab . g
 -- // Experimental printing of expressions \\ --
 
 instance (Term a, Term b) => Term (And a b) where
-  term t = terml t ++ " /\\ " ++ termr t
+  term = term2 " /\\ "
   pre = const 3
 
 instance (Term a, Term b) => Term (Or a b) where
-  term t = terml t ++ " \\/ " ++ termr t
+  term = term2 " \\/ "
   pre = const 2
 
 instance (Term a) => Term (Neg a) where
@@ -151,11 +151,11 @@ instance (Term a) => Term (Neg a) where
   pre = const 4
 
 instance (Term a, Term b) => Term (Imp a b) where
-  term t = terml t ++ " -> " ++ termr t
+  term = term2 " -> "
   pre = const 1
 
 instance (Term a, Term b) => Term ((->) a b) where
-  term t = terml t ++ " ~> " ++ termr t
+  term = term2 " ~> "
   pre = const 0
 
 instance Term Bot where

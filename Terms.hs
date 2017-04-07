@@ -8,6 +8,7 @@ module Terms
   , terml
   , termm
   , termr
+  , term2
   ) where
 
 
@@ -44,3 +45,6 @@ termr t
   | pre s < pre t = "(" ++ term s ++ ")"
   | otherwise     = term s
     where s = snd' t
+
+term2 :: (Term (t a b), Term a, Term b) => String -> t a b -> String
+term2 s t = terml t ++ s ++ termr t
