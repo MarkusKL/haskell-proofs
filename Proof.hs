@@ -139,25 +139,35 @@ dimap f g ab = impI $ f . impE ab . g
 -- // Experimental printing of expressions \\ --
 
 instance (Term a, Term b) => Term (And a b) where
-  term t = "( " ++ term (fst' t) ++ " /\\ " ++ term (snd' t) ++ " )"
+  term t = terml t ++ " /\\ " ++ termr t
+  pre = const 3
 
 instance (Term a, Term b) => Term (Or a b) where
-  term t = "( " ++ term (fst' t) ++ " \\/ " ++ term (snd' t) ++ " )"
+  term t = terml t ++ " \\/ " ++ termr t
+  pre = const 2
 
 instance (Term a) => Term (Neg a) where
-  term t = "!" ++ term (only t)
+  term t = "!" ++ termm t
+  pre = const 4
 
 instance (Term a, Term b) => Term (Imp a b) where
-  term t = "( " ++ term (fst' t) ++ " -> " ++ term (snd' t) ++ " )"
+  term t = terml t ++ " -> " ++ termr t
+  pre = const 1
 
 instance (Term a, Term b) => Term ((->) a b) where
-  term t = "( " ++ term (fst' t) ++ " ~> " ++ term (snd' t) ++ " )"
+  term t = terml t ++ " ~> " ++ termr t
+  pre = const 0
 
 instance Term Bot where
   term = const "_|_"
+  pre = const 5
 
 main :: IO ()
 main = print' (proof1 :: And A B -> And B A)
     >> print' (proof2 :: And (And A B) C -> And A (And B C))
     >> print' (mt :: Imp A B -> Neg B -> Neg A)
     >> print' (botE :: (Bot -> A))
+    >> print' (proof3 :: Or A B -> Or B A)
+    >> print' (proof6 :: Imp A (Imp A B) -> A -> B)
+    >> print' (bimap :: (A -> B) -> (B -> C) -> And A B -> And B C)
+
