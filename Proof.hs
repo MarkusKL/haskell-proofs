@@ -11,32 +11,32 @@ import Data.Bifunctor
 import Variables
 import Terms
 
-type Proof = Writer [String]
+type Proof = Writer [(String,String)]
 
-axiom :: String -> Proof a
-axiom s = writer (undefined,[s])
+axiom :: (Term a) => String -> Proof a
+axiom s = axiom' s $ return undefined
 
+axiom' :: (Term a) => String -> Proof a -> Proof a
+axiom' s a = a >> writer (undefined,[(term (unpack a),s)])
+ 
 premise :: Term a => Proof a
-premise = put $ axiom "præmis"
+premise = axiom "præmis"
 
 unpack :: Proof a -> a
 unpack = undefined
-
-put :: (Term a) => Proof a -> Proof a
-put a = a >> axiom (term $ unpack a)
 
 -- // Syntactic rules for the 'and' symbol \\ --
 
 newtype And a b = And Void
 
 andE1 :: (Term a, Term b) => And a b -> Proof a
-andE1 _ = put $ axiom "andE1"
+andE1 _ = axiom "andE1"
 
 andE2 :: (Term a, Term b) => And a b -> Proof b
-andE2 _ = put $ axiom "andE2"
+andE2 _ = axiom "andE2"
 
 andI :: (Term a, Term b) => a -> b -> Proof (And a b)
-andI _ _ = put $ axiom "andI"
+andI _ _ = axiom "andI"
 
 
 -- // Proofs using 'and' rules \\ --
@@ -45,7 +45,13 @@ proof1 :: (Term a, Term b) => And a b -> Proof (And b a)
 proof1 p1 = join $ liftM2 andI (andE2 p1) (andE1 p1)
 
 showProof :: Proof a -> String
-showProof = unlines . execWriter
+showProof = unlines . (\xs -> showTuple (longest xs) <$> xs) . execWriter
+  where longest xs = (2+) . maximum $ length . fst <$> xs
+
+showTuple :: Int -> (String,String) -> String
+showTuple i (s1,s2) = s1 ++ spaces ++ s2
+  where indent = i - length s1
+        spaces = replicate indent ' '
 
 main :: IO ()
 main = (putStr . showProof) (proof1 =<< premise :: Proof (And B A)) 
