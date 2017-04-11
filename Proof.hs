@@ -2,7 +2,7 @@
 module Proof () where
 
 import Data.Void
-import Data.Functor.Identity (Identity, runIdentity)
+import Control.Monad.Writer.Lazy
 
 import Data.Bifunctor
 --import Data.Functor.Contravariant
@@ -11,36 +11,59 @@ import Data.Bifunctor
 import Variables
 import Terms
 
+type Proof = Writer [String]
+
+axiom :: String -> Proof a
+axiom s = writer (undefined,[s])
+
+premise :: Term a => Proof a
+premise = put $ axiom "præmis"
+
+unpack :: Proof a -> a
+unpack = undefined
+
+put :: (Term a) => Proof a -> Proof a
+put a = a >> axiom (term $ unpack a)
+
 -- // Syntactic rules for the 'and' symbol \\ --
 
 newtype And a b = And Void
 
-andE1 :: And a b -> a
-andE1 = undefined
+andE1 :: (Term a, Term b) => And a b -> Proof a
+andE1 _ = put $ axiom "andE1"
 
-andE2 :: And a b -> b
-andE2 = undefined
+andE2 :: (Term a, Term b) => And a b -> Proof b
+andE2 _ = put $ axiom "andE2"
 
-andI :: a -> b -> And a b
-andI = undefined
+andI :: (Term a, Term b) => a -> b -> Proof (And a b)
+andI _ _ = put $ axiom "andI"
 
 
 -- // Proofs using 'and' rules \\ --
 
-proof1 :: And a b -> And b a
-proof1 p1 = andI (andE2 p1) (andE1 p1)
+proof1 :: (Term a, Term b) => And a b -> Proof (And b a)
+proof1 p1 = join $ liftM2 andI (andE2 p1) (andE1 p1)
 
-proof2 :: And (And a b) c -> And a (And b c)
-proof2 p1 = runIdentity $ do
-  let ab = andE1 p1
-  let c = andE2 p1
-  let a = andE1 ab
-  let b = andE2 ab
-  return $ andI a (andI b c)
+showProof :: Proof a -> String
+showProof = unlines . execWriter
+
+main :: IO ()
+main = (putStr . showProof) (proof1 =<< premise :: Proof (And B A)) 
+    >> putStrLn "-------------------------"
+    >> (putStr . showProof) (proof2 =<< premise :: Proof (And A (And B C)))
+
+proof2 :: (Term a, Term b, Term c) => And (And a b) c -> Proof (And a (And b c))
+proof2 p1 = do
+  ab <- andE1 p1
+  c <- andE2 p1
+  a <- andE1 ab
+  b <- andE2 ab
+  bc <- andI b c
+  andI a bc
+{-
 
 
 -- // Syntactic rules for the 'or' symbol \\ --
-
 newtype Or a b = Or Void
 
 orI1 :: a -> Or a b
@@ -137,11 +160,11 @@ dimap f g ab = impI $ f . impE ab . g
   
 
 -- // Experimental printing of expressions \\ --
-
+-}
 instance (Term a, Term b) => Term (And a b) where
   term = term2 " /\\ "
   pre = const 3
-
+{-
 instance (Term a, Term b) => Term (Or a b) where
   term = term2 " \\/ "
   pre = const 2
@@ -171,3 +194,4 @@ main = print' (proof1 :: And A B -> And B A)
     >> print' (proof6 :: Imp A (Imp A B) -> A -> B)
     >> print' (bimap :: (A -> B) -> (B -> C) -> And A B -> And B C)
 
+-}
