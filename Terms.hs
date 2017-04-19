@@ -1,6 +1,6 @@
 
 module Terms
-  ( Term (term,pre)
+  ( Term (term,pre,con,ext)
   , fst'
   , snd'
   , only
@@ -15,6 +15,8 @@ module Terms
 class Term t where
   term :: t -> String
   pre :: t -> Integer
+  con :: Integer -> t
+  ext :: t -> Integer
 
 fst' :: Term (t a b) => t a b -> a
 fst' = undefined
@@ -22,7 +24,7 @@ fst' = undefined
 snd' :: Term (t a b) => t a b -> b
 snd' = undefined
 
-only :: f a -> a
+only :: Term (t a) => t a -> a
 only = undefined
 
 print' :: Term t => t -> IO ()
