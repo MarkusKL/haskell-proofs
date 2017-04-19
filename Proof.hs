@@ -74,6 +74,8 @@ main = (putStr . showProof) (proof1 =<< premise :: Proof (And B A))
     >> (putStr . showProof) (negnegI =<< premise :: Proof (Neg (Neg A)))
     >> putLine
     >> (putStr . showProof) (Proof.exp =<< premise :: Proof (Imp A (Imp B C)))
+    >> putLine
+    >> (putStr . showProof) (join $ liftM2 mt premise (premise :: Proof (Neg Q)) :: Proof (Neg P))
 
 putLine :: IO ()
 putLine = putStrLn ("\n" ++ replicate 32 '\9472' ++ "\n")
@@ -189,11 +191,13 @@ exp ab'c = do
 
 -- // Proof of modus tollens (MT) \\ --
 
-
-{-
-mt :: (Term p, Term q) => Imp p q -> Neg q -> Neg p
-mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
--}
+mt :: (Term p, Term q) => Imp p q -> Neg q -> Proof (Neg p)
+mt ipq nq = do
+  negI =<< (assume $ \p -> do
+           q <- impE ipq p
+           qnq <- andI q nq
+           negE qnq
+       )
 
 -- // Experimental printing of expressions \\ --
 
