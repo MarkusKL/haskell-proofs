@@ -6,10 +6,6 @@ import Control.Monad.RWS.Lazy
 import Control.Monad ((>=>), (<=<))
 import Data.List (intersperse)
 
-import Data.Bifunctor
---import Data.Functor.Contravariant
---import Data.Profunctor
-
 import Variables
 import Terms
 import Stream
@@ -197,27 +193,10 @@ exp ab'c = do
 {-
 mt :: (Term p, Term q) => Imp p q -> Neg q -> Neg p
 mt ipq nq = negI (\p -> negE $ andI (impE ipq p) nq)
-
--- // Functor instances \\ --
-
-instance Bifunctor And where
-  first f ab = andI (f . andE1 $ ab) (andE2 ab)
-  second f ab = andI (andE1 ab) (f . andE2 $ ab)
-
-instance Bifunctor Or where
-  first f ab = orE ab (orI1 . f) (orI2)
-  second f ab = orE ab (orI1) (orI2 . f)
-
--- ### Missing dependency
---instance Contravariant Neg where
-contramap = mt
-
---instance Profunctor Imp where
-dimap f g ab = impI $ f . impE ab . g
-  
+-}
 
 -- // Experimental printing of expressions \\ --
--}
+
 instance (Term a, Term b) => Term (And a b) where
   term = term2 " /\\ "
   pre = const 3
